@@ -1,8 +1,7 @@
-tiempos.pdf: energia.pdf 
+energias.pdf tiempos.pdf: datos.dat tiempos.dat
 	python tiempos.py
-energia.pdf: datos.dat
 	python grafica.py
-datos.dat: compila
+datos.dat tiempos.dat: compila
 	./a.out 1 
 	./a.out 2
 	./a.out 4
