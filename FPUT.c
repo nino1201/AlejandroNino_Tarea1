@@ -143,7 +143,7 @@ double *F(double  *x)
     #pragma omp parallel for shared(x,ac)    
     for(n=1;n<N-1;n++)
     {
-        ac[n]=(x[n+1]-2*x[n]+x[n-1])+B*(pow(x[n+1]-x[n-1],2)-pow(x[n]-x[n-1],2));    
+        ac[n]=(x[n+1]-2*x[n]+x[n-1])+B*(pow(x[n+1]-x[n],2)-pow(x[n]-x[n-1],2));    
     }
     return ac;    
 }
