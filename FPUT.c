@@ -13,9 +13,9 @@ double energia(double *x,double *v,int m);
 double *F(double  *x);
 
 int main(int argc, char **argv){
-  printf("%f\n",1.0);
-  //int threads=atoi(argv[1]);
-  //omp_set_num_threads(threads);
+  
+  int threads=atoi(argv[1]);
+  omp_set_num_threads(threads);
   int Tiempos = T/dt;
   double *X = malloc(N*sizeof(double));
   double *V = malloc(N*sizeof(double));
@@ -25,8 +25,6 @@ int main(int argc, char **argv){
   double *E1 = malloc(1000*sizeof(double));
   double *E2 = malloc(1000*sizeof(double));
   double *E3 = malloc(1000*sizeof(double));
-  
-  printf("%f \n",1.1);
   
   int a;
   int i;
@@ -43,15 +41,15 @@ int main(int argc, char **argv){
   aux_X[0]=aux_X[N-1]=0;
   aux_V[0]=aux_V[N-1]=0;
   
-  printf("%f \n",1.3);
-
-  //double ti= omp_get_wtime();
-  //#pragma omp parallel for shared(X,V)
+  double ti= omp_get_wtime();
+#pragma omp parallel for shared(X,V)
   for(i=1;i<N-1;i++){
     X[i] = sin(PI*i/(N-1));
     V[i] = 0;
     V_half[i] = 0;
+    printf("%f \n",X[i]);
   }
+  
   
   E1[0]=energia(X,V,1);
   E2[0]=energia(X,V,2);
@@ -62,21 +60,20 @@ int main(int argc, char **argv){
 
   //solución paralelizada
   for(t=1;t<Tiempos;t++){
-    #pragma omp parallel for shared(X,V,aux_X,aux_V)
+#pragma omp parallel for shared(X,V,aux_X,aux_V)
     for(z=1;z<N-1;z++){
       aux_V[z]=V[z];
       aux_X[z]=X[z];
     }
-    #pragma omp parallel for shared(X,V_half,aux_X,aux_V)
+#pragma omp parallel for shared(X,V_half,aux_X,aux_V)
     for(j=1;j<N-1;j++){
       V_half[j] = aux_V[j] + 0.5*dt*F(aux_X)[j];
     }
-    #pragma omp parallel for shared(X,V,V_half,aux_X,aux_V)
+#pragma omp parallel for shared(X,V,V_half,aux_X,aux_V)
     for(a=1;a<N-1;a++){
       X[a]=aux_X[a]+dt*V_half[a];
     }
-
-    #pragma omp parallel for shared(X,V,V_half)
+#pragma omp parallel for shared(X,V,V_half)
     for(k=1;k<N-1;k++){
       V[k] = V_half[k]+0.5*dt*F(X)[k];
     }
@@ -89,12 +86,12 @@ int main(int argc, char **argv){
       }
   }
 
-  //double tf= omp_get_wtime();
-  //double tt=tf-ti;
-  //FILE* TIEMPOS;
-  //TIEMPOS=fopen("tiempos.dat","wt");
-  //fprintf(TIEMPOS,"%f %d",tt,threads);
-  //fclose(TIEMPOS);
+  double tf= omp_get_wtime();
+  double tt=tf-ti;
+  FILE* TIEMPOS;
+  TIEMPOS=fopen("tiempos.dat","wt");
+  fprintf(TIEMPOS,"%f %d",tt,threads);
+  fclose(TIEMPOS);
 
   return 0;
 }
@@ -110,19 +107,16 @@ double energia(double *x,double *v,int m)
   int l;
   int y;
   double E;
-  //#pragma omp parallel for reduction (+ : Qp)
+  #pragma omp parallel for reduction (+ : Qp)
   for(l=0;l<N;l++){
     Qp+= x[l]*sin(PI*m*l/N);
-    printf("%f %f\n",x[l],Qp);
   }
-  //#pragma omp parallel for reduction (+ : Qk)
+  #pragma omp parallel for reduction (+ : Qk)
   
   for(y=0;y<N;y++){
     Qk+= v[y]*sin(PI*m*y/N);
   }
-  printf("%f\n",pow(Qk,2));
-  E=0.5*(pow(cte*Qp,2) + w*pow(cte*Qk,2));
-  printf("%f \n",E);
+  E=0.5*(pow(cte*Qk,2) + w*pow(cte*Qp,2));
   return E;
 }
 
@@ -135,7 +129,7 @@ double *F(double  *x)
     int n;
     ac[0]=0;
     ac[N-1]=0;
-    //#pragma omp parallel for shared(x,ac)    
+    #pragma omp parallel for shared(x,ac)    
     for(n=1;n<N-1;n++)
     {
         ac[n]=(x[n+1]-2*x[n]+x[n-1])+B*(pow(x[n+1]-x[n-1],2)-pow(x[n]-x[n-1],2));    
