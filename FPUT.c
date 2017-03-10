@@ -65,22 +65,27 @@ int main(int argc, char **argv){
 
   //solución paralelizada
   for(t=1;t<Tiempos;t++){
+    double *ac;
+    double *ac2;
 #pragma omp parallel for shared(X,V,aux_X,aux_V)
     for(z=1;z<N-1;z++){
       aux_V[z]=V[z];
       aux_X[z]=X[z];
     }
+    ac=F(aux_X);
 #pragma omp parallel for shared(X,V_half,aux_X,aux_V)
     for(j=1;j<N-1;j++){
-      V_half[j] = aux_V[j] + 0.5*dt*F(aux_X)[j];
+      V_half[j] = aux_V[j] + 0.5*dt*ac[j];
     }
+    
 #pragma omp parallel for shared(X,V,V_half,aux_X,aux_V)
     for(a=1;a<N-1;a++){
       X[a]=aux_X[a]+dt*V_half[a];
     }
+    ac2=F(X);
 #pragma omp parallel for shared(X,V,V_half)
     for(k=1;k<N-1;k++){
-      V[k] = V_half[k]+0.5*dt*F(X)[k];
+      V[k] = V_half[k]+0.5*dt*ac2[k];
     }
     if(t%((int)Tiempos/1000)==0){
 	E1[e]=energia(X,V,1);
