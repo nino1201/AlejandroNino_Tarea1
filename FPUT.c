@@ -100,7 +100,7 @@ int main(int argc, char **argv){
   double tf= omp_get_wtime();
   double tt=tf-ti;
   FILE* TIEMPOS;
-  TIEMPOS=fopen("tiempos.dat","wt");
+  TIEMPOS=fopen("tiempos.dat","at");
   fprintf(TIEMPOS,"%f %d",tt,threads);
   fclose(TIEMPOS);
 
