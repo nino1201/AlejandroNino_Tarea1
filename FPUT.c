@@ -42,12 +42,17 @@ int main(int argc, char **argv){
   aux_V[0]=aux_V[N-1]=0;
   
   double ti= omp_get_wtime();
+
+  FILE* Es;
+  Es=fopen("datos.dat","wt");
+  
+
 #pragma omp parallel for shared(X,V)
   for(i=1;i<N-1;i++){
     X[i] = sin(PI*i/(N-1));
     V[i] = 0;
     V_half[i] = 0;
-    printf("%f \n",X[i]);
+    
   }
   
   
@@ -56,7 +61,7 @@ int main(int argc, char **argv){
   E3[0]=energia(X,V,3);  
 
   //imprime primeras energías
-  printf("%f %f %f \n",E1[0],E2[0],E3[0]);
+  fprintf(Es,"%f %f %f \n",E1[0],E2[0],E3[0]);
 
   //solución paralelizada
   for(t=1;t<Tiempos;t++){
@@ -81,11 +86,12 @@ int main(int argc, char **argv){
 	E1[e]=energia(X,V,1);
 	E2[e]=energia(X,V,2);
 	E3[e]=energia(X,V,3);
-	printf("%f %f %f \n",E1[e],E2[e],E3[e]);
+	fprintf(Es,"%f %f %f \n",E1[e],E2[e],E3[e]);
 	e+=1;
       }
   }
 
+  fclose(Es);
   double tf= omp_get_wtime();
   double tt=tf-ti;
   FILE* TIEMPOS;
