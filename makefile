@@ -3,7 +3,7 @@ tiempos.pdf: energia.pdf
 energia.pdf: datos.dat
 	python grafica.py
 datos.dat: compila
-	./a.out 1 > datos.dat
+	./a.out 1 
 	./a.out 2
 	./a.out 4
 compila: FPUT.c
